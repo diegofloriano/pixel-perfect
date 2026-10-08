@@ -10,33 +10,73 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CandidaturasRouteImport } from './routes/candidaturas'
+import { Route as EstudioRouteImport } from './routes/estudio'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as VagasRouteImport } from './routes/vagas'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CandidaturasRoute = CandidaturasRouteImport.update({
+  id: '/candidaturas',
+  path: '/candidaturas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstudioRoute = EstudioRouteImport.update({
+  id: '/estudio',
+  path: '/estudio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VagasRoute = VagasRouteImport.update({
+  id: '/vagas',
+  path: '/vagas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/candidaturas': typeof CandidaturasRoute
+  '/estudio': typeof EstudioRoute
+  '/perfil': typeof PerfilRoute
+  '/vagas': typeof VagasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/candidaturas': typeof CandidaturasRoute
+  '/estudio': typeof EstudioRoute
+  '/perfil': typeof PerfilRoute
+  '/vagas': typeof VagasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/candidaturas': typeof CandidaturasRoute
+  '/estudio': typeof EstudioRoute
+  '/perfil': typeof PerfilRoute
+  '/vagas': typeof VagasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/candidaturas' | '/estudio' | '/perfil' | '/vagas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/candidaturas' | '/estudio' | '/perfil' | '/vagas'
+  id: '__root__' | '/' | '/candidaturas' | '/estudio' | '/perfil' | '/vagas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CandidaturasRoute: typeof CandidaturasRoute
+  EstudioRoute: typeof EstudioRoute
+  PerfilRoute: typeof PerfilRoute
+  VagasRoute: typeof VagasRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +88,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/candidaturas': {
+      id: '/candidaturas'
+      path: '/candidaturas'
+      fullPath: '/candidaturas'
+      preLoaderRoute: typeof CandidaturasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estudio': {
+      id: '/estudio'
+      path: '/estudio'
+      fullPath: '/estudio'
+      preLoaderRoute: typeof EstudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vagas': {
+      id: '/vagas'
+      path: '/vagas'
+      fullPath: '/vagas'
+      preLoaderRoute: typeof VagasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CandidaturasRoute: CandidaturasRoute,
+  EstudioRoute: EstudioRoute,
+  PerfilRoute: PerfilRoute,
+  VagasRoute: VagasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
