@@ -214,6 +214,7 @@ export type Application = {
   stage: Stage;
   resumeVersion?: string;
   atsScore?: number;
+  resume?: Profile;
   updatedAt: string;
 };
 
