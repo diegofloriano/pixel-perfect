@@ -36,7 +36,7 @@ function PerfilPage() {
 
   const save = () => { updateProfile(draft); toast.success("Currículo base salvo!"); };
   const importRaw = () => {
-    if (!raw.trim()) return toast.error("Cole o texto do seu currículo primeiro");
+    if (!raw.trim()) { toast.error("Cole o texto do seu currículo primeiro"); return; }
     const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
     const bullets = lines.filter((l) => /^[-•*]/.test(l)).map((l) => l.replace(/^[-•*]\s*/, ""));
     const summary = lines.find((l) => l.length > 80) ?? draft.summary;

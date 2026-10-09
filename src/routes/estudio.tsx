@@ -31,7 +31,7 @@ export const Route = createFileRoute("/estudio")({
 
 function EstudioPage() {
   const { jobs, profile, selectedJobId, setSelectedJobId, upsertApplication, incResumes } = useStore();
-  const job = jobs.find((j) => j.id === selectedJobId) ?? jobs[0];
+  const job = jobs.find((j) => j.id === selectedJobId) ?? jobs[0]!;
   const [optimized, setOptimized] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [showBefore, setShowBefore] = useState(false);
