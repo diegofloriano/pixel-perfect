@@ -36,7 +36,7 @@ function VagasPage() {
   const [area, setArea] = useState("all");
 
   const analyze = () => {
-    if (jd.trim().length < 30) return toast.error("Cole a descrição completa da vaga (ou URL + descrição)");
+    if (jd.trim().length < 30) { toast.error("Cole a descrição completa da vaga (ou URL + descrição)"); return; }
     const lower = jd.toLowerCase();
     const keywords = KNOWN.filter((k) => lower.includes(k.toLowerCase()));
     const title = jd.split("\n").find((l) => l.trim())?.slice(0, 70) ?? "Vaga externa";
