@@ -22,13 +22,13 @@ const Ctx = createContext<Store | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [profiles, setProfiles] = useState(seedProfiles);
-  const [profileId, setProfileId] = useState(seedProfiles[0].id);
+  const [profileId, setProfileId] = useState(seedProfiles[0]!.id);
   const [jobs, setJobs] = useState(seedJobs);
-  const [selectedJobId, setSelectedJobId] = useState(seedJobs[0].id);
+  const [selectedJobId, setSelectedJobId] = useState(seedJobs[0]!.id);
   const [applications, setApps] = useState(initialApplications);
   const [resumesGenerated, setRes] = useState(2);
 
-  const profile = profiles.find((p) => p.id === profileId) ?? profiles[0];
+  const profile = profiles.find((p) => p.id === profileId) ?? profiles[0]!;
   const today = () => new Date().toISOString().slice(0, 10);
 
   const upsertApplication = (jobId: string, patch: Partial<Application>) =>
