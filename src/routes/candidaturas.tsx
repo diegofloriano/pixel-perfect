@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ResumePreview } from "@/components/resume/ResumePreview";
 import { MatchBadge } from "@/components/ats/ScoreGauge";
 import { STAGES, type Application, type Stage } from "@/data/mockData";
 import { useStore } from "@/lib/store";
@@ -110,6 +112,15 @@ function CandidaturasPage() {
                     <p className="font-medium">{live.resumeVersion ?? "Nenhuma versão gerada ainda"}</p>
                     {live.atsScore != null && <p className="mt-1">Score ATS: <b>{live.atsScore}</b></p>}
                   </div>
+                  {live.resume && (
+                    <Dialog>
+                      <DialogTrigger asChild><Button variant="outline" className="w-full">Ver currículo enviado</Button></DialogTrigger>
+                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                        <DialogHeader><DialogTitle>{live.resumeVersion}</DialogTitle></DialogHeader>
+                        <ResumePreview profile={live.resume} />
+                      </DialogContent>
+                    </Dialog>
+                  )}
                   <Button asChild className="w-full" onClick={() => setSelectedJobId(j.id)}><Link to="/estudio">Abrir no Estúdio ATS</Link></Button>
                 </div>
               </>

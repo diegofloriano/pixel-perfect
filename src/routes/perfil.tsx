@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Check, Loader2, Plus, RotateCcw, Settings, Trash2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,14 +28,27 @@ export const Route = createFileRoute("/perfil")({
 });
 
 function PerfilPage() {
-  const { profile, updateProfile } = useStore();
+  const { profile, updateProfile, hydrated, resetDemo } = useStore();
   const [draft, setDraft] = useState<Profile>(profile);
   const [raw, setRaw] = useState("");
-  useEffect(() => setDraft(profile), [profile]);
+  const [status, setStatus] = useState<"saved" | "saving">("saved");
+  // Re-sync the form when switching profile, after loading saved data, or after a reset
+  useEffect(() => setDraft(profile), [profile.id, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Autosave (debounced)
+  useEffect(() => {
+    if (JSON.stringify(draft) === JSON.stringify(profile)) return;
+    setStatus("saving");
+    const t = setTimeout(() => { updateProfile(draft); setStatus("saved"); }, 600);
+    return () => clearTimeout(t);
+  }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
   const set = (patch: Partial<Profile>) => setDraft((d) => ({ ...d, ...patch }));
   const pct = profileCompleteness(draft);
 
-  const save = () => { updateProfile(draft); toast.success("Currículo base salvo!"); };
+  const reset = () => {
+    if (!confirm("Apagar suas alterações e voltar aos dados de demonstração?")) return;
+    resetDemo();
+    setTimeout(() => toast.success("Dados de demonstração restaurados"), 0);
+  };
   const importRaw = () => {
     if (!raw.trim()) { toast.error("Cole o texto do seu currículo primeiro"); return; }
     const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -52,9 +66,18 @@ function PerfilPage() {
           <p className="text-sm text-muted-foreground">Seu Master Resume — a base de todas as versões ATS.</p>
         </div>
         <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            {status === "saving" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-success" />}
+            {status === "saving" ? "Salvando..." : "Salvo"}
+          </span>
           <Progress value={pct} className="h-2 w-32" />
           <Badge variant="highlight">{pct}% completo</Badge>
-          <Button onClick={save}>Salvar</Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild><Button variant="outline" size="icon" aria-label="Configurações"><Settings className="h-4 w-4" /></Button></DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={reset}><RotateCcw className="h-4 w-4" />Resetar para dados de demonstração</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <Tabs defaultValue="pessoal">
