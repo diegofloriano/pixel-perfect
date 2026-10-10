@@ -30,30 +30,55 @@ export const Route = createFileRoute("/estudio")({
 });
 
 function EstudioPage() {
-  const { jobs, profile, selectedJobId, setSelectedJobId, upsertApplication, incResumes } = useStore();
+  const { jobs, profile, selectedJobId, setSelectedJobId, upsertApplication, incResumes, applications, hydrated } = useStore();
   const job = jobs.find((j) => j.id === selectedJobId) ?? jobs[0]!;
+  const app = applications.find((a) => a.jobId === job.id);
   const [optimized, setOptimized] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [showBefore, setShowBefore] = useState(false);
-  useEffect(() => { setOptimized(null); setShowBefore(false); }, [job.id, profile.id]);
+  // Restore the saved ATS version linked to this job's application
+  useEffect(() => {
+    setOptimized(app?.resume && app.resume.id === profile.id ? app.resume : null);
+    setShowBefore(false);
+  }, [job.id, profile.id, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const current = optimized && !showBefore ? optimized : profile;
   const diag = useMemo(() => atsChecklist(current, job), [current, job]);
   const baseScore = useMemo(() => atsChecklist(profile, job).score, [profile, job]);
-  const { found: jdFound } = keywordMatch(job.keywords, resumeToText(current));
+  const jdFound = diag.found;
+
+  const persist = (o: Profile, label?: string) =>
+    upsertApplication(job.id, {
+      ...(label ? { stage: app && app.stage !== "Salva" ? app.stage : "Currículo Gerado", resumeVersion: label } : {}),
+      atsScore: atsChecklist(o, job).score,
+      resume: o,
+    });
 
   const generate = () => {
     setLoading(true);
     setTimeout(() => {
       const o = optimizeResume(profile, job);
       setOptimized(o); setLoading(false); incResumes();
-      const score = atsChecklist(o, job).score;
-      upsertApplication(job.id, { stage: "Currículo Gerado", atsScore: score, resumeVersion: `v${Date.now() % 100} – ${job.company}` });
+      const n = (app?.resumeVersion?.match(/^v(\d+)/)?.[1] ?? "0");
+      persist(o, `v${Number(n) + 1} – ${job.company}`);
       toast.success("Currículo otimizado com sucesso!");
     }, 1600);
   };
 
-  const editSummary = (summary: string) => optimized && setOptimized({ ...optimized, summary });
+  const update = (o: Profile) => { setOptimized(o); persist(o); };
+  const editSummary = (summary: string) => optimized && update({ ...optimized, summary });
+
+  const insertTerm = (term: string, where: "skills" | "bullet") => {
+    const base = optimized ?? structuredClone(profile);
+    const next: Profile =
+      where === "skills"
+        ? { ...base, skills: [...base.skills, term] }
+        : { ...base, experiences: base.experiences.map((e, i) => (i === 0 ? { ...e, bullets: [...e.bullets, suggestionFor(term)] } : e)) };
+    if (!optimized) persist(next, `v${Number(app?.resumeVersion?.match(/^v(\d+)/)?.[1] ?? 0) + 1} – ${job.company}`);
+    else persist(next);
+    setOptimized(next); setShowBefore(false);
+    toast.success(`"${term}" inserido no currículo`);
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-4">
@@ -133,14 +158,40 @@ function EstudioPage() {
                   <span>{c.label}</span>
                 </div>
               ))}
-              {diag.missing.length > 0 && (
-                <div className="rounded-lg border border-highlight-border bg-highlight p-3">
-                  <p className="mb-1.5 text-xs font-semibold text-highlight-foreground">Palavras-chave faltantes</p>
-                  <div className="flex flex-wrap gap-1">{diag.missing.map((m) => <Badge key={m} variant="outline" className="bg-card">{m}</Badge>)}</div>
-                </div>
-              )}
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Keywords Críticas Encontradas</CardTitle></CardHeader>
+            <CardContent className="flex flex-wrap gap-1.5">
+              {diag.found.length ? diag.found.map((k) => <Badge key={k} variant="sky">✓ {k}</Badge>) : <p className="text-xs text-muted-foreground">Nenhuma ainda.</p>}
+            </CardContent>
+          </Card>
+          {diag.missing.length > 0 && (
+            <Card className="border-highlight-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Keywords Recomendadas Ausentes</CardTitle>
+                <p className="text-xs text-muted-foreground">Clique para inserir no currículo.</p>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-1.5">
+                {diag.missing.map((m) => (
+                  <Popover key={m}>
+                    <PopoverTrigger asChild>
+                      <button type="button"><Badge variant="highlight" className="cursor-pointer hover:bg-highlight-border">+ {m}</Badge></button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 space-y-3">
+                      <p className="text-sm font-semibold">Inserir “{m}”</p>
+                      <p className="rounded-md bg-muted p-2 text-xs italic text-secondary-foreground">{suggestionFor(m)}</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="flex-1" onClick={() => insertTerm(m, "bullet")}>Inserir frase</Button>
+                        <Button size="sm" variant="outline" onClick={() => insertTerm(m, "skills")}>Só habilidade</Button>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">Só inclua termos que você realmente domina.</p>
+                    </PopoverContent>
+                  </Popover>
+                ))}
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardContent className="space-y-2 p-4">
               <Dialog>
