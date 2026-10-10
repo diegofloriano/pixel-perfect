@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { JobCard } from "@/components/jobs/JobCard";
 import type { Job } from "@/data/mockData";
 import { affinityScore } from "@/lib/ats";
+import { extractKeywords } from "@/lib/keywords";
 import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/vagas")({
