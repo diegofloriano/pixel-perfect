@@ -127,7 +127,7 @@
   @page { size: A4; margin: 16mm 18mm; }
   html, body { background: oklch(1 0 0) !important; height: auto !important; }
   body * { visibility: hidden; }
-  .no-print, [data-sidebar], header { display: none !important; }
+  .no-print, [data-sidebar] { display: none !important; }
   .print-area, .print-area * { visibility: visible; }
   .print-area {
     position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0 !important;
