@@ -69,7 +69,7 @@ export function extractKeywords(text: string, limit = 18): Keyword[] {
         for (let n = 1; n <= 3 && i + n <= toks.length; n++) {
           const gram = toks.slice(i, i + n);
           const first = norm(gram[0]!), last = norm(gram[gram.length - 1]!);
-          if (STOP.has(first) || STOP.has(last)) continue;
+          if (gram.some((g) => STOP.has(norm(g)))) continue;
           if (n === 1 && first.length < 2) continue;
           if (gram.some((g) => /^\d+$/.test(g))) continue;
           const signal = gram.filter((g) => isTech(g) || isProper(g)).length;
